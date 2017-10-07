@@ -163,4 +163,53 @@ public class Kirjavarasto {
         return kirjat;
     }
     
+    //---------Tunnukset---------
+    
+        public void rekisteroiKayttaja(String uusiTunnnus, String uusiSalasana) {
+            Connection yhteys = YhteydenHallinta.avaaYhteys(ajuri, url, kayttaja, salasana);
+            if (yhteys == null) {
+                return;
+            }
+            String lisaaSql = "insert into login (Username, Password) values (?,?)";
+            PreparedStatement lisayslause = null;
+            try {            
+                lisayslause = yhteys.prepareStatement(lisaaSql);
+                lisayslause.setString(1, uusiTunnnus);
+                lisayslause.setString(2, uusiSalasana);
+                lisayslause.executeUpdate();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                YhteydenHallinta.suljeLause(lisayslause);
+                YhteydenHallinta.suljeYhteys(yhteys);
+            }
+        }
+    
+        public Kayttaja haeTunnus(String tunnus) {
+            Connection yhteys=YhteydenHallinta.avaaYhteys(ajuri, url, kayttaja, salasana);
+            if(yhteys==null) return null;
+            PreparedStatement hakulause=null;
+            ResultSet tulosjoukko=null;
+            try{
+                String hakuSql="select * from login where Username=?";
+                hakulause=yhteys.prepareStatement(hakuSql);
+                hakulause.setString(1, tunnus);
+                tulosjoukko=hakulause.executeQuery();
+                if(tulosjoukko.next()) {
+                    return new Kayttaja(tulosjoukko.getInt(1), tulosjoukko.getString(2),tulosjoukko.getString(3));
+                }
+                else { //jos ei löytynyt eli tulosjoukko oli tyhjä
+                    return null;
+                }
+            }
+            catch(Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+            finally{
+                YhteydenHallinta.suljeTulosjoukko(tulosjoukko);
+                YhteydenHallinta.suljeLause(hakulause);
+                YhteydenHallinta.suljeYhteys(yhteys);
+            }
+    }
 }

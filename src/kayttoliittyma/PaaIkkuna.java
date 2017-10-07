@@ -11,46 +11,25 @@ import tietovarasto.Kirjavarasto;
  */
 public class PaaIkkuna extends JFrame {
 
-    private final JButton lisaa = new JButton("Lisää");
-    private final JButton poista = new JButton("Poista");
-    private final JButton muuta = new JButton("Muuta");
-    private final JButton hae = new JButton("Hae");
-    private final JButton haeKaikki = new JButton("Hae Kaikki");
+    public static enum valikkoTila{KIRJAUTUMINEN, PAAVALIKKO};
 
-    private final JPanel pohjapaneeli = new JPanel();
-    private Kirjavarasto kirjakanta = new Kirjavarasto();
+    private JPanel pohjapaneeli;
+    
+    private Kirjautuminen kirjautuminen;
+    private Paavalikko paavalikko;
+    private Kirjavarasto kirjakanta;
 
     public PaaIkkuna() {
-        GroupLayout asettelu = new GroupLayout(pohjapaneeli);
-        pohjapaneeli.setLayout(asettelu);
-
-        asettelu.setAutoCreateGaps(true);
-        asettelu.setAutoCreateContainerGaps(true);
-
-        //X-suunta
-        GroupLayout.ParallelGroup pohjaX = asettelu.createParallelGroup();
+        this.pohjapaneeli = new JPanel();
+        this.kirjakanta = new Kirjavarasto();
+        this.kirjautuminen = new Kirjautuminen(this);
+        this.paavalikko = new Paavalikko(this);
         
-        pohjaX.addComponent(lisaa, 160, GroupLayout.DEFAULT_SIZE, 1000);
-        pohjaX.addComponent(poista, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, 1000);
-        pohjaX.addComponent(muuta, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, 1000);
-        pohjaX.addComponent(hae, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, 1000);
-        pohjaX.addComponent(haeKaikki, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, 1000);
-
-        //asettelu.linkSize(lisaa, poista, muuta, hae, haeKaikki);
-        asettelu.setHorizontalGroup(pohjaX);
-
-        //Y-suunta
-        GroupLayout.SequentialGroup pohjaY = asettelu.createSequentialGroup();
-        pohjaY.addComponent(lisaa);
-        pohjaY.addComponent(poista);
-        pohjaY.addComponent(muuta);
-        pohjaY.addComponent(hae);
-        pohjaY.addComponent(haeKaikki);
-
-        asettelu.setVerticalGroup(pohjaY);
+        this.pohjapaneeli.add(kirjautuminen.getPaneeli());
         this.add(pohjapaneeli);
         this.setTitle("Pääikkuna");
         this.setLocationRelativeTo(null);
+        this.setResizable(false);
         this.pack();
 
         this.addWindowListener(new WindowAdapter() {
@@ -60,71 +39,22 @@ public class PaaIkkuna extends JFrame {
             }
         });
 
-        lisaa.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                lisaaKirja();
-            }
-        });
-        
-        poista.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                poistaKirja();
-            }
-        });
-        
-        muuta.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                muutaKirja();
-            }
-        });
-
-        hae.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                haeKirja();
-            }
-        });
-
-        haeKaikki.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                haeKaikkiKirjat();
-            }
-        });
-
-    }
-
-    //Nappuloiden toiminnot
-    private void lisaaKirja() {
-        KirjanLisays ikkuna = new KirjanLisays(kirjakanta);
-        ikkuna.setLocationRelativeTo(lisaa);
-        ikkuna.setVisible(true);
     }
     
-    private void poistaKirja() {
-        KirjanPoistaminen ikkuna = new KirjanPoistaminen(kirjakanta);
-        ikkuna.setLocationRelativeTo(poista);
-        ikkuna.setVisible(true);
-    }
-    
-    private void haeKirja() {
-        KirjanHaku ikkuna = new KirjanHaku(kirjakanta);
-        ikkuna.setLocationRelativeTo(hae);
-        ikkuna.setVisible(true);
-    }
-
-    private void muutaKirja() {
-        KirjanMuuttaminen ikkuna = new KirjanMuuttaminen(kirjakanta);
-        ikkuna.setLocationRelativeTo(muuta);
-        ikkuna.setVisible(true);
-    }
-    
-    private void haeKaikkiKirjat() {
-        JTextArea hakualue=new JTextArea(20,20);
-        JScrollPane scroll=new JScrollPane(hakualue);
-        for(Kirja kirja:kirjakanta.haeKaikkiKirjat()) {
-            hakualue.append(kirja + "\n");
-        }
-        JOptionPane.showMessageDialog(this, scroll, "Hae Kaikki", 
-                                        JOptionPane.INFORMATION_MESSAGE);
+    public void valikonVaihtaminen(valikkoTila valikkotila) {
+         if (valikkotila == valikkoTila.PAAVALIKKO) {
+             this.pohjapaneeli.removeAll();
+             this.paavalikko = new Paavalikko(this);
+             this.pohjapaneeli.add(this.paavalikko.getPaneeli());
+             this.pack();
+             //this.setVisible(true);
+         } else if (valikkotila == valikkoTila.KIRJAUTUMINEN){
+             this.pohjapaneeli.removeAll();
+             this.kirjautuminen = new Kirjautuminen(this);
+             this.pohjapaneeli.add(this.kirjautuminen.getPaneeli());
+             this.pack();
+             //this.setVisible(true);
+         }
     }
     
     private void suoritaLopputoimet() {
